@@ -27,15 +27,14 @@ public class StatementPrinter {
      * Returns a formatted statement of the invoice associated with this printer.
      *
      * @return the formatted statement
-     * @throws RuntimeException if one of the play types is not known
      */
     public String statement() {
-        StringBuilder statement = new StringBuilder(
+        final StringBuilder statement = new StringBuilder(
                 "Statement for " + invoice.getCustomer() + System.lineSeparator());
 
         // loop responsible only for building the per-performance lines
         for (Performance performance : invoice.getPerformances()) {
-            Play play = getPlay(performance);
+            final Play play = getPlay(performance);
             statement.append(String.format("  %s: %s (%s seats)%n",
                     play.getName(),
                     usd(getAmount(performance)),
@@ -44,7 +43,8 @@ public class StatementPrinter {
 
         // totals now computed via query methods
         statement.append(String.format("Amount owed is %s%n", usd(getTotalAmount())));
-        statement.append(String.format("You earned %s credits%n", getTotalVolumeCredits()));
+        statement.append(
+                String.format("You earned %s credits%n", getTotalVolumeCredits()));
         return statement.toString();
     }
 
@@ -63,10 +63,11 @@ public class StatementPrinter {
      *
      * @param performance the performance for which to calculate the amount
      * @return the amount owed, in cents
+     * @throws RuntimeException if the play type is unknown
      */
     private int getAmount(Performance performance) {
-        Play play = getPlay(performance);
-        int audience = performance.getAudience();
+        final Play play = getPlay(performance);
+        final int audience = performance.getAudience();
         int result;
 
         switch (play.getType()) {
@@ -116,22 +117,30 @@ public class StatementPrinter {
      */
     private int getVolumeCredits(Performance performance) {
         int result = 0;
-        Play play = getPlay(performance);
+        final Play play = getPlay(performance);
 
         if ("tragedy".equals(play.getType())) {
             result += Math.max(
-                    performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
-        } else if ("comedy".equals(play.getType())) {
+                    performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD,
+                    0);
+        }
+        else if ("comedy".equals(play.getType())) {
             result += Math.max(
-                    performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
+                    performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD,
+                    0);
             result += performance.getAudience()
                     / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
-        } else if ("history".equals(play.getType())) {
+        }
+        else if ("history".equals(play.getType())) {
             result += Math.max(
-                    performance.getAudience() - Constants.HISTORY_VOLUME_CREDIT_THRESHOLD, 0);
-        } else if ("pastoral".equals(play.getType())) {
+                    performance.getAudience() - Constants.HISTORY_VOLUME_CREDIT_THRESHOLD,
+                    0);
+        }
+        else if ("pastoral".equals(play.getType())) {
             result += Math.max(
-                    performance.getAudience() - Constants.PASTORAL_VOLUME_CREDIT_THRESHOLD, 0);
+                    performance.getAudience()
+                            - Constants.PASTORAL_VOLUME_CREDIT_THRESHOLD,
+                    0);
             result += performance.getAudience() / 2;
         }
 
@@ -171,7 +180,8 @@ public class StatementPrinter {
      * @return the formatted amount as a US currency string
      */
     private String usd(int amountInCents) {
-        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
+        final NumberFormat currencyFormatter =
+                NumberFormat.getCurrencyInstance(Locale.US);
         return currencyFormatter.format(
                 (double) amountInCents / Constants.PERCENT_FACTOR);
     }
