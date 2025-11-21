@@ -1,3 +1,6 @@
+147cc57 finished Task 2.4
+2319532 fixed something
+1c087e4 finished Task 2.3
 171df41 finished Task 2.2
 2d0895b finished Task 2.1
 5bceb80 finished Task 1.2
