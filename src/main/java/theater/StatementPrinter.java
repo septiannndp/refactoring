@@ -30,29 +30,21 @@ public class StatementPrinter {
      * @throws RuntimeException if one of the play types is not known
      */
     public String statement() {
-        int totalAmount = 0;
-        int volumeCredits = 0;
-
         StringBuilder statement = new StringBuilder(
                 "Statement for " + invoice.getCustomer() + System.lineSeparator());
 
+        // loop responsible only for building the per-performance lines
         for (Performance performance : invoice.getPerformances()) {
             Play play = getPlay(performance);
-
-            // add volume credits
-            volumeCredits += getVolumeCredits(performance);
-
-            // print line for this order
             statement.append(String.format("  %s: %s (%s seats)%n",
                     play.getName(),
                     usd(getAmount(performance)),
                     performance.getAudience()));
-
-            totalAmount += getAmount(performance);
         }
 
-        statement.append(String.format("Amount owed is %s%n", usd(totalAmount)));
-        statement.append(String.format("You earned %s credits%n", volumeCredits));
+        // totals now computed via query methods
+        statement.append(String.format("Amount owed is %s%n", usd(getTotalAmount())));
+        statement.append(String.format("You earned %s credits%n", getTotalVolumeCredits()));
         return statement.toString();
     }
 
@@ -147,6 +139,32 @@ public class StatementPrinter {
     }
 
     /**
+     * Calculates the total volume credits across all performances.
+     *
+     * @return the total volume credits
+     */
+    private int getTotalVolumeCredits() {
+        int result = 0;
+        for (Performance performance : invoice.getPerformances()) {
+            result += getVolumeCredits(performance);
+        }
+        return result;
+    }
+
+    /**
+     * Calculates the total amount (in cents) across all performances.
+     *
+     * @return the total amount in cents
+     */
+    private int getTotalAmount() {
+        int result = 0;
+        for (Performance performance : invoice.getPerformances()) {
+            result += getAmount(performance);
+        }
+        return result;
+    }
+
+    /**
      * Formats an amount (in cents) as a US currency string.
      *
      * @param amountInCents the amount in cents
@@ -154,7 +172,6 @@ public class StatementPrinter {
      */
     private String usd(int amountInCents) {
         NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
-        // assumes you have Constants.PERCENT_FACTOR = 100;
         return currencyFormatter.format(
                 (double) amountInCents / Constants.PERCENT_FACTOR);
     }
