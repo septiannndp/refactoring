@@ -42,22 +42,7 @@ public class StatementPrinter {
             Play play = getPlay(performance);
 
             // add volume credits
-            if ("tragedy".equals(play.getType())) {
-                volumeCredits += Math.max(
-                        performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
-            } else if ("comedy".equals(play.getType())) {
-                volumeCredits += Math.max(
-                        performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
-                volumeCredits += performance.getAudience()
-                        / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
-            } else if ("history".equals(play.getType())) {
-                volumeCredits += Math.max(
-                        performance.getAudience() - Constants.HISTORY_VOLUME_CREDIT_THRESHOLD, 0);
-            } else if ("pastoral".equals(play.getType())) {
-                volumeCredits += Math.max(
-                        performance.getAudience() - Constants.PASTORAL_VOLUME_CREDIT_THRESHOLD, 0);
-                volumeCredits += performance.getAudience() / 2;
-            }
+            volumeCredits += getVolumeCredits(performance);
 
             // print line for this order
             statement.append(String.format("  %s: %s (%s seats)%n",
@@ -131,6 +116,36 @@ public class StatementPrinter {
             default:
                 throw new RuntimeException(
                         String.format("unknown type: %s", play.getType()));
+        }
+
+        return result;
+    }
+
+    /**
+     * Calculates the volume credits for a single performance.
+     *
+     * @param performance the performance for which to calculate volume credits
+     * @return the volume credits earned for this performance
+     */
+    private int getVolumeCredits(Performance performance) {
+        int result = 0;
+        Play play = getPlay(performance);
+
+        if ("tragedy".equals(play.getType())) {
+            result += Math.max(
+                    performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
+        } else if ("comedy".equals(play.getType())) {
+            result += Math.max(
+                    performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
+            result += performance.getAudience()
+                    / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
+        } else if ("history".equals(play.getType())) {
+            result += Math.max(
+                    performance.getAudience() - Constants.HISTORY_VOLUME_CREDIT_THRESHOLD, 0);
+        } else if ("pastoral".equals(play.getType())) {
+            result += Math.max(
+                    performance.getAudience() - Constants.PASTORAL_VOLUME_CREDIT_THRESHOLD, 0);
+            result += performance.getAudience() / 2;
         }
 
         return result;
